@@ -13,3 +13,4 @@ for data in dataset:
     links = newsoup.findAll('a', {'class': 'list-title td-none td-ul-hover'})
     for link in links:
         print(link.get("href"))
+
