@@ -1,11 +1,47 @@
 import pandas
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
-itr = pandas.read_sas('NHANES/2017/Demographics/DEMO_J.xpt', chunksize=1000000)
-for chunk in itr:
-    print(chunk);
+data = pandas.read_sas('NHANES/2017/Demographics/DEMO_J.xpt')
+#for chunk in data:
+#    print(chunk)
+
+features = (list(data.columns))
+
+# 1. Standardising the data
+# Separating out the features
+x = data.loc[:, features].values
+# Separating out the target
+#y = data.loc[:, ['target']].values
+# Standardizing the features
+x = StandardScaler().fit_transform(x)
 
 
+# 2. PCA Projection to 2D
+pca = PCA(n_components=2)
+principalComponents = pca.fit_transform(x)
+principalDf = pandas.DataFrame(data=principalComponents, columns=['principal component 1', 'principal component 2'])
 
+finalDf = pandas.concat([principalDf, data[['target']]], axis=1)
+
+
+# 3. Visualise 2D Projection
+plt.figure()
+plt.figure(figsize=(10, 10))
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=14)
+plt.xlabel('Principal Component - 1', fontsize=20)
+plt.ylabel('Principal Component - 2', fontsize=20)
+plt.title("Principal Component Analysis of Demographics", fontsize=20)
+targets = ['DMDEDUC2', 'DMQMILIZ']
+colors = ['r', 'g']
+for target, color in zip(targets, colors):
+    indicesToKeep = data['label'] == target
+    plt.scatter(principalDf.loc[indicesToKeep, 'principal component 1']
+               , principalDf.loc[indicesToKeep, 'principal component 2'], c = color, s = 50)
+
+plt.legend(targets,prop={'size': 15})
 
 
 '''
