@@ -14,7 +14,7 @@ df = pandas.read_sas('NHANES/2017/Demographics/DEMO_J.xpt')
 df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.fillna(df.mean(), inplace=True)
 
-#for chunk in data:
+#for chunk in df:
 #    print(chunk)
 
 
