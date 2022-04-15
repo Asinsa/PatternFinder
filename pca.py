@@ -1,4 +1,3 @@
-import inline as inline
 import matplotlib
 import pandas
 from sklearn.preprocessing import StandardScaler
@@ -129,6 +128,8 @@ plt.title('NHANES. t-SNE projection');
 plt.show()
 '''
 
+
+
 '''
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
@@ -201,55 +202,4 @@ for target, color in zip(targets, colors):
                , principalDf.loc[indicesToKeep, 'principal component 2'], c = color, s = 50)
 
 plt.legend(targets,prop={'size': 15})
-'''
-
-'''
-import xport
-
-with open('NHANES/2017/Demographics/DEMO_J.xpt', 'rb') as f:
-    for row in xport.Reader(f):
-        print(row)
-
-'''
-
-'''
-
-
-import matplotlib.pyplot as plt
-
-from sklearn import datasets
-from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-
-iris = datasets.load_iris()
-
-X = iris.data
-y = iris.target
-target_names = iris.target_names
-
-
-pca = PCA(n_components=2)
-X_r = pca.fit(X).transform(X)
-
-lda = LinearDiscriminantAnalysis(n_components=2)
-X_r2 = lda.fit(X, y).transform(X)
-
-# Percentage of variance explained for each components
-print(
-    "explained variance ratio (first two components): %s"
-    % str(pca.explained_variance_ratio_)
-)
-
-plt.figure()
-colors = ["navy", "turquoise", "darkorange"]
-lw = 2
-
-for color, i, target_name in zip(colors, [0, 1, 2], target_names):
-    plt.scatter(
-        X_r[y == i, 0], X_r[y == i, 1], color=color, alpha=0.8, lw=lw, label=target_name
-    )
-plt.legend(loc="best", shadow=False, scatterpoints=1)
-plt.title("PCA of IRIS dataset")
-
-plt.show()
 '''
