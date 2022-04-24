@@ -66,7 +66,7 @@ plt.title('NHANES. PCA projection')
 plt.show()
 '''
 
-'''
+
 # 3.2 PCA With Color
 color_features = []
 for i in df.columns:
@@ -86,7 +86,7 @@ x_3d = pca.fit_transform(df)
 plt.figure(figsize = (7,7))
 plt.scatter(x_3d[:,0],x_3d[:,1], alpha=0.1)
 plt.show()
-'''
+
 
 '''
 # 3.3 PCA and KMeans
