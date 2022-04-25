@@ -3,8 +3,6 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 
-import pandas
-import numpy as np
 import pattern_finder
 
 
@@ -34,23 +32,16 @@ class App(tk.Tk):
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
-        self.show_frame(HomePage, "")
+        self.show_frame(HomePage, "", "normal")
 
-    def show_frame(self, cont, filename):
+    def show_frame(self, cont, filename, sc):
+        self.state(sc)
         if cont == HomePage:
-            self.state("normal")
             frame = cont(self, self.container)
         else:
-            self.state("zoomed")
-            frame = cont(self, self.container, self.prepare_data(filename))
+            frame = cont(self, self.container, filename)
         frame.grid(row=0, column=0, sticky="nsew")
         frame.tkraise()  ## This line will put the frame on front
-
-    def prepare_data(self, filename):
-        data_frame = pandas.read_sas(filename)
-        data_frame.replace([np.inf, -np.inf], np.nan, inplace=True)
-        data_frame.fillna(data_frame.mean(), inplace=True)
-        return data_frame
 
 
 class HomePage(tk.Frame):
@@ -96,11 +87,42 @@ class HomePage(tk.Frame):
                 title='Selected File',
                 message=filename
             )
-            self.parent.show_frame(pattern_finder.ChooseVisual, filename)
+            self.parent.show_frame(Menu, filename, "normal")
 
     def test_file(self):
         filename = "D:/Documents/GitHub/Project Stuff/WebScraper/NHANES/2013/Demographics/DEMO_H.XPT"
-        self.parent.show_frame(pattern_finder.ChooseVisual, filename)
+        self.parent.show_frame(Menu, filename, "normal")
+
+
+class Menu(tk.Frame):
+    def __init__(self, parent, container, filename):
+        super().__init__(container)
+
+        self.parent = parent
+
+        # Title label
+        title = ttk.Label(
+            self,
+            text='Menu',
+            font=("Helvetica", 14))
+
+        title.pack(ipadx=10, ipady=10)
+
+        # Open file button
+        choose_visual = ttk.Button(
+            self,
+            text='Choose Graph Type',
+            command=lambda: self.parent.show_frame(pattern_finder.ChooseVisual, filename, "zoomed")
+        )
+        choose_visual.pack(expand=True)
+
+        # Choose example button
+        change_visual = ttk.Button(
+            self,
+            text='Choose Variables & Visualise Changes',
+            command=lambda: self.parent.show_frame(pattern_finder.ChooseVisual, filename, "zoomed")
+        )
+        change_visual.pack(expand=True)
 
 
 if __name__ == "__main__":

@@ -17,7 +17,6 @@ df.fillna(df.mean(), inplace=True)
 #for chunk in df:
 #    print(chunk)
 
-
 features = (list(df.columns))
 
 '''
@@ -66,7 +65,7 @@ plt.title('NHANES. PCA projection')
 plt.show()
 '''
 
-
+'''
 # 3.2 PCA With Color
 color_features = []
 for i in df.columns:
@@ -86,10 +85,35 @@ x_3d = pca.fit_transform(df)
 plt.figure(figsize = (7,7))
 plt.scatter(x_3d[:,0],x_3d[:,1], alpha=0.1)
 plt.show()
+'''
+
+# 3.3.1 PCA and KMeans but rainbowz
+pca = PCA(2)
+
+# Transform the data
+data = pca.fit_transform(df)
+
+# Import KMeans module
+from sklearn.cluster import KMeans
+
+# Initialize the class object
+kmeans = KMeans(n_clusters=10)
+
+# predict the labels of clusters.
+label = kmeans.fit_predict(data)
+
+# Getting unique labels
+u_labels = np.unique(label)
+
+# plotting the results:
+for i in u_labels:
+    plt.scatter(data[label == i, 0], data[label == i, 1], label="Cluster " + str(i))
+plt.legend()
+plt.show()
 
 
 '''
-# 3.3 PCA and KMeans
+# 3.3.2 PCA and KMeans
 from sklearn.cluster import KMeans
 
 # calling sklearn PCA
@@ -111,6 +135,7 @@ plt.figure(figsize = (7,7))
 plt.scatter(x_3d[:,0],x_3d[:,1], c= label_color, alpha=0.1)
 plt.show()
 '''
+
 
 '''
 # 4. t-SNE Scatter graph
