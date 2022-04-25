@@ -29,31 +29,21 @@ class App(tk.Tk):
         self.geometry(f'{self.window_width}x{self.window_height}+{center_x}+{center_y}')
 
         ## Creating a container
-        container = tk.Frame(self, bg="#8AA7A9")
-        container.pack(side="top", fill="both", expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        ## Initialize Frames
-        self.frames = {}
-        self.HomePage = HomePage
-        self.ChooseVisual = pattern_finder.ChooseVisual
-
-        ## Defining Frames and Packing it
-        for F in {HomePage, self.ChooseVisual}:
-            frame = F(self, container)
-            self.frames[F] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+        self.container = tk.Frame(self, bg="#8AA7A9")
+        self.container.pack(side="top", fill="both", expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
 
         self.show_frame(HomePage, "")
 
     def show_frame(self, cont, filename):
         if cont == HomePage:
             self.state("normal")
+            frame = cont(self, self.container)
         else:
             self.state("zoomed")
-            pattern_finder.data = self.prepare_data(filename)
-        frame = self.frames[cont]
+            frame = cont(self, self.container, self.prepare_data(filename))
+        frame.grid(row=0, column=0, sticky="nsew")
         frame.tkraise()  ## This line will put the frame on front
 
     def prepare_data(self, filename):

@@ -10,22 +10,20 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 class ChooseVisual(tk.Frame):
-    def __init__(self, parent, container):
+    def __init__(self, parent, container, data):
         super().__init__(container)
 
-        data = None
-
         ## Title label
-        title_frame = tk.Frame(self)
+        self.title_frame = tk.Frame(self)
         title = ttk.Label(
-            title_frame,
+            self.title_frame,
             text='Choose Visualisation',
             font=("Helvetica", 25),
         )
         title.pack(expand=True)
 
         ## menu left
-        buttons = tk.Frame(self, width=200)
+        self.buttons = tk.Frame(self, width=200)
 
         selected = {'fg': '#F0F0F0', 'bg': 'RoyalBlue3', 'activebackground':
             'gray71', 'activeforeground': 'gray71'}
@@ -36,37 +34,36 @@ class ChooseVisual(tk.Frame):
 
         # PCA 2D button
         pca_2d = Button(
-            buttons,
+            self.buttons,
             text='2D PCA',
-            command=lambda:[pca_2d_graph(), update_style(0)]
+            command=lambda: [update_style(0), self.pca_2d_graph(data, self.canvas_area)]
         )
         pca_2d.pack(expand=True)
         bnt_list.append(pca_2d)
 
-
         # PCA 3D button
         pca_3d = Button(
-            buttons,
+            self.buttons,
             text='3D PCA',
-            command=lambda:[pca_3d_graph(), update_style(1)]
+            command=lambda: [update_style(1), self.pca_3d_graph()]
         )
         pca_3d.pack(expand=True)
         bnt_list.append(pca_3d)
 
         # KMeans button
         kmeans = Button(
-            buttons,
+            self.buttons,
             text='KMeans',
-            command=lambda:[kmeans_graph(), update_style(2)]
+            command=lambda: [update_style(2), self.kmeans_graph()]
         )
         kmeans.pack(expand=True)
         bnt_list.append(kmeans)
 
         # t-SNE button
         tsne = Button(
-            buttons,
+            self.buttons,
             text='t-SNE',
-            command=lambda:[tsne_graph(), update_style(3)]
+            command=lambda: [update_style(3), self.tsne_graph()]
         )
         tsne.pack(expand=True)
         bnt_list.append(tsne)
@@ -75,78 +72,78 @@ class ChooseVisual(tk.Frame):
         image = Image.open("Graphs/1-boxplot-dark.png")
         photo = ImageTk.PhotoImage(image)
 
+        self.canvas_area = tk.Frame(self)
+        # aa = Label(self.canvas_area, image=photo)
+        # aa.image = photo
+        # aa.pack(expand=True)
+        self.canvas_area.grid(row=1)
+
+        '''
+        image = Image.open("Graphs/1-boxplot-dark.png")
+        photo = ImageTk.PhotoImage(image)
+
         canvas_area = Label(self, image=photo)
         canvas_area.image = photo
         canvas_area.grid(row=1)
+        '''
 
         # save
-        save_button = Button(self, text="Save Image")
+        self.save_button = Button(self, text="Save Image")
 
-        title_frame.grid(row=0, column=0, columnspan=2, pady=40, sticky="nsew")
-        buttons.grid(row=1, column=0, padx=30, pady=30, rowspan=2, sticky="nsew")
-        canvas_area.grid(row=1, column=1, sticky="nsew")
-        save_button.grid(row=2, column=1, sticky="nsew")
+        self.title_frame.grid(row=0, column=0, columnspan=2, pady=40, sticky="nsew")
+        self.buttons.grid(row=1, column=0, padx=30, pady=30, rowspan=2, sticky="nsew")
+        self.canvas_area.grid(row=1, column=1, sticky="nsew")
+        self.save_button.grid(row=2, column=1, sticky="nsew")
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # Define a function to update the button style
+        # Change color of button to indicate which graph is being shown and clear canvas
         def update_style(clicked):
             for x in range(4):
                 if x == clicked:
                     bnt_list[x].configure(**selected)
                 else:
                     bnt_list[x].configure(**unselected)
+            clear_canvas(self.canvas_area)
 
-    @property
-    def data(self):
-        return self._data
+        def clear_canvas(canvas_area):
+            for graph in canvas_area.winfo_children():
+                graph.destroy()
 
-    @data.setter
-    def data(self, data):
-        self._data = data
+    def pca_2d_graph(self, df, canvas_area):
+        print("pca 2d")
 
+        features = (list(df.columns))
 
-def pca_2d_graph():
-    print("pca 2d")
+        # 3.2 PCA With Color
+        color_features = []
+        for i in df.columns:
+            if 'color' in i:
+                color_features.append(i)
+        # create our color dataframe and inspect first 5 rows with head()
+        data_color = df[color_features]
+        data_color.head()
 
+        X = data_color.values
+        # calling sklearn PCA
+        pca = PCA(n_components=3)
+        # fit X and apply the reduction to X
+        x_3d = pca.fit_transform(df)
 
-    '''
-    features = (list(df.columns))
+        # Let's see how it looks like in 2D - could do a 3D plot as well
+        pca_2d_graph = plt.figure(figsize=(7, 7))
+        plt.scatter(x_3d[:, 0], x_3d[:, 1], alpha=0.1)
+        # plt.show()
 
-    # 3.2 PCA With Color
-    color_features = []
-    for i in df.columns:
-        if 'color' in i:
-            color_features.append(i)
-    # create our color dataframe and inspect first 5 rows with head()
-    data_color = df[color_features]
-    data_color.head()
+        graph = FigureCanvasTkAgg(pca_2d_graph, canvas_area)
+        graph.get_tk_widget().pack(side="top", fill="both", expand=True)
 
-    X = data_color.values
-    # calling sklearn PCA
-    pca = PCA(n_components=3)
-    # fit X and apply the reduction to X
-    x_3d = pca.fit_transform(df)
+    def pca_3d_graph(self):
+        print("pca 3d")
 
-    # Let's see how it looks like in 2D - could do a 3D plot as well
-    plt.figure(figsize=(7, 7))
-    plt.scatter(x_3d[:, 0], x_3d[:, 1], alpha=0.1)
-    plt.show()
+    def kmeans_graph(self):
+        print("kmeans")
 
-    figure = plt.Figure(figsize=(6, 5), dpi=100)
-    chart_type = FigureCanvasTkAgg(figure, vis_menu)
-    chart_type.get_tk_widget().pack()
-    '''
-
-
-def pca_3d_graph():
-    print("pca 3d")
-
-
-def kmeans_graph():
-    print("kmeans")
-
-
-def tsne_graph():
-    print("t-sne")
+    def tsne_graph(self):
+        print("t-sne")
