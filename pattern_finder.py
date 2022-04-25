@@ -4,6 +4,8 @@ from tkinter import ttk
 from tkinter import *
 from PIL import ImageTk, Image
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -45,7 +47,7 @@ class ChooseVisual(tk.Frame):
         pca_3d = Button(
             self.buttons,
             text='3D PCA',
-            command=lambda: [update_style(1), self.pca_3d_graph()]
+            command=lambda: [update_style(1), self.pca_3d_graph(data, self.canvas_area)]
         )
         pca_3d.pack(expand=True)
         bnt_list.append(pca_3d)
@@ -54,7 +56,7 @@ class ChooseVisual(tk.Frame):
         kmeans = Button(
             self.buttons,
             text='KMeans',
-            command=lambda: [update_style(2), self.kmeans_graph()]
+            command=lambda: [update_style(2), self.kmeans_graph(data, self.canvas_area)]
         )
         kmeans.pack(expand=True)
         bnt_list.append(kmeans)
@@ -63,7 +65,7 @@ class ChooseVisual(tk.Frame):
         tsne = Button(
             self.buttons,
             text='t-SNE',
-            command=lambda: [update_style(3), self.tsne_graph()]
+            command=lambda: [update_style(3), self.tsne_graph(data, self.canvas_area)]
         )
         tsne.pack(expand=True)
         bnt_list.append(tsne)
@@ -134,16 +136,50 @@ class ChooseVisual(tk.Frame):
         # Let's see how it looks like in 2D - could do a 3D plot as well
         pca_2d_graph = plt.figure(figsize=(7, 7))
         plt.scatter(x_3d[:, 0], x_3d[:, 1], alpha=0.1)
-        # plt.show()
 
         graph = FigureCanvasTkAgg(pca_2d_graph, canvas_area)
         graph.get_tk_widget().pack(side="top", fill="both", expand=True)
 
-    def pca_3d_graph(self):
+    def pca_3d_graph(self, df, canvas_area):
         print("pca 3d")
 
-    def kmeans_graph(self):
+    def kmeans_graph(self, df, canvas_area):
         print("kmeans")
 
-    def tsne_graph(self):
+        # calling sklearn PCA
+        pca = PCA(n_components=3)
+        # fit X and apply the reduction to X
+        x_3d = pca.fit_transform(df)
+
+        # Set a 3 KMeans clustering
+        kmeans = KMeans(n_clusters=3, random_state=0)
+        # Compute cluster centers and predict cluster indices
+        X_clustered = kmeans.fit_predict(x_3d)
+
+        LABEL_COLOR_MAP = {0: 'r',
+                           1: 'g',
+                           2: 'b'}
+
+        label_color = [LABEL_COLOR_MAP[l] for l in X_clustered]
+        kmeans_graph = plt.figure(figsize=(7, 7))
+        plt.scatter(x_3d[:, 0], x_3d[:, 1], c=label_color, alpha=0.1)
+
+        graph = FigureCanvasTkAgg(kmeans_graph, canvas_area)
+        graph.get_tk_widget().pack(side="top", fill="both", expand=True)
+
+    def tsne_graph(self, df, canvas_area):
         print("t-sne")
+
+        tsne = TSNE(random_state=17)
+
+        X_tsne = tsne.fit_transform(df)
+
+        tsne_graph = plt.figure(figsize=(12, 10))
+        plt.scatter(X_tsne[:, 0], X_tsne[:, 1],
+                    edgecolor='none', alpha=0.7, s=40,
+                    cmap=plt.cm.get_cmap('nipy_spectral', 10))
+        plt.colorbar()
+        plt.title('NHANES. t-SNE projection');
+
+        graph = FigureCanvasTkAgg(tsne_graph, canvas_area)
+        graph.get_tk_widget().pack(side="top", fill="both", expand=True)
