@@ -8,9 +8,38 @@ import numpy as np
 # Importing Modules
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+import os
+from pathlib import Path
+from sklearn.manifold import TSNE
 
-df = pandas.read_sas('NHANES/2017/Demographics/DEMO_J.xpt')
+#df = pandas.read_sas('NHANES/2017/Demographics/DEMO_J.xpt')
 #df = pandas.read_sas('NHANES/2017/Dietary/DR1IFF_J.xpt')
+
+files = Path('NHANES').glob('*')
+for file in files:
+    for filename in os.scandir(file):
+        if filename.is_file():
+            df = pandas.read_sas(filename.path)
+            df.replace([np.inf, -np.inf], np.nan, inplace=True)
+            df.fillna(df.mean(), inplace=True)
+
+            tsne = TSNE(random_state=17)
+            X_tsne = tsne.fit_transform(df)
+            plt.figure(figsize=(12, 10))
+            plt.scatter(X_tsne[:, 0], X_tsne[:, 1],
+                        edgecolor='none', alpha=0.7, s=40,
+                        cmap=plt.cm.get_cmap('nipy_spectral', 10))
+            plt.colorbar()
+
+            plt.title('NHANES. t-SNE projection for ' + Path(filename.path).stem, fontsize=20)
+            plt.xlabel("t-SNE-x", fontsize=14)
+            plt.ylabel("t-SNE-y", fontsize=14)
+
+            #plt.show()
+            save = 'Graphs/tsne/' + Path(filename.path).stem + ".png"
+            plt.savefig(save, bbox_inches='tight')
+
+'''
 df.replace([np.inf, -np.inf], np.nan, inplace=True)
 df.fillna(df.mean(), inplace=True)
 
@@ -18,6 +47,7 @@ df.fillna(df.mean(), inplace=True)
 #    print(chunk)
 
 features = (list(df.columns))
+'''
 
 '''
 #DONT DELETE
@@ -46,6 +76,12 @@ plt.show()
 plt.figure(figsize=(8,6))
 sns.set(style="whitegrid")
 sns.heatmap(df2[features].corr(method='pearson'), vmin=-.1, vmax=1,  annot=True, cmap='RdYlGn')
+plt.show()
+
+#2.2 Even Scarier Heat Map
+plt.figure(figsize=(12,10))
+cor = df.corr()
+sns.heatmap(cor, annot=True, cmap=plt.cm.Reds)
 plt.show()
 '''
 
@@ -87,6 +123,7 @@ plt.scatter(x_3d[:,0],x_3d[:,1], alpha=0.1)
 plt.show()
 '''
 
+'''
 # 3.3.1 PCA and KMeans but rainbowz
 pca = PCA(2)
 
@@ -110,6 +147,7 @@ for i in u_labels:
     plt.scatter(data[label == i, 0], data[label == i, 1], label="Cluster " + str(i))
 plt.legend()
 plt.show()
+'''
 
 
 '''
@@ -136,7 +174,6 @@ plt.scatter(x_3d[:,0],x_3d[:,1], c= label_color, alpha=0.1)
 plt.show()
 '''
 
-
 '''
 # 4. t-SNE Scatter graph
 from sklearn.manifold import TSNE
@@ -151,9 +188,8 @@ plt.scatter(X_tsne[:, 0], X_tsne[:, 1],
 plt.colorbar()
 plt.title('NHANES. t-SNE projection');
 plt.show()
+
 '''
-
-
 
 '''
 from sklearn.cluster import KMeans
